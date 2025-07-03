@@ -9,11 +9,12 @@ import Doctors from './pages/Doctors';
 import AppointmentForm from './pages/AppointmentForm';
 import History from './pages/History';
 import AdminDoctors from './pages/AdminDoctors';
+import DoctorLogin from './pages/DoctorLogin';
 import NotFound from './pages/NotFound';
 
 function AppContent() {
   const location = useLocation();
-  const noNavbarPaths = ['/', '/login', '/signup'];
+  const noNavbarPaths = ['/', '/login', '/signup', '/doctor/login'];
   const showNavbar = !noNavbarPaths.includes(location.pathname);
 
   return (
@@ -28,6 +29,7 @@ function AppContent() {
         <Route path="/appointment" element={<AppointmentForm />} />
         <Route path="/history" element={<History />} />
         <Route path="/admin/doctors" element={<AdminDoctors />} />
+        <Route path="/doctor/login" element={<DoctorLogin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

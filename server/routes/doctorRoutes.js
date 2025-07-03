@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Doctor = require('../models/Doctor');
+const Doctor = require('../models/Doctor.js');
+const Appointment = require('../models/Appointment.js');
 // POST /api/doctors → Add a new doctor
 router.post('/', async (req, res) => {
   try {
@@ -23,55 +24,52 @@ router.post('/', async (req, res) => {
 
 // GET /api/doctors/availability?name=Dr.Salini&date=2025-06-24
 router.get('/availability', async (req, res) => {
-  const { name, day } = req.query;
+  const { name, date } = req.query;
+
+  console.log('Query received:', { name, date });
+
+  if (!name || !date) {
+    return res.status(400).json({ message: 'Doctor name and date are required' });
+  }
 
   try {
     const doctor = await Doctor.findOne({ name });
-    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-    const isAvailable = doctor.availableDays.includes(day);
-    if (!isAvailable) return res.status(400).json({ message: 'Doctor not available on this day' });
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
 
-    const appointmentsCount = await Appointment.countDocuments({ doctorName: name, day }); // Use `day` in your schema
+    const selectedDay = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    console.log('Selected day:', selectedDay);
+
+    if (!doctor.availableDays.includes(selectedDay)) {
+      return res.status(400).json({ message: `Doctor is not available on ${selectedDay}` });
+    }
+
+    const maxAppointments = doctor.maxAppointmentsPerDay;
+
+    const existingAppointments = await Appointment.countDocuments({
+      doctorName: name,
+      date,
+    });
+
+    const availableSlots = maxAppointments - existingAppointments;
+
+    const dutyTimeParts = doctor.dutyTime.split(' - ');
+    const dutyStart = dutyTimeParts[0]?.trim(); // e.g., "10:30 AM"
 
     return res.status(200).json({
-      availableSlots: doctor.maxAppointmentsPerDay - appointmentsCount,
-      existingAppointments: appointmentsCount,
-      maxAppointments: doctor.maxAppointmentsPerDay,
-      dutyStart: doctor.dutyTime.split(' ')[0],
-      dutyStartPeriod: doctor.dutyTime.split(' ')[1],
-      availableDays: doctor.availableDays
+      availableSlots,
+      dutyStart,
+      maxAppointments,
     });
   } catch (err) {
-    console.error('Availability check failed:', err);
-    return res.status(500).json({ message: 'Server error' });
+    console.error('Error in availability route:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
-router.get('/availability', async (req, res) => {
-  const { name, day } = req.query;
 
-  try {
-    const doctor = await Doctor.findOne({ name });
-    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-    const isAvailable = doctor.availableDays.includes(day);
-    if (!isAvailable) return res.status(400).json({ message: 'Doctor not available on this day' });
-
-    const appointmentsCount = await Appointment.countDocuments({ doctorName: name, day }); // Use `day` in your schema
-
-    return res.status(200).json({
-      availableSlots: doctor.maxAppointmentsPerDay - appointmentsCount,
-      existingAppointments: appointmentsCount,
-      maxAppointments: doctor.maxAppointmentsPerDay,
-      dutyStart: doctor.dutyTime.split(' ')[0],
-      dutyStartPeriod: doctor.dutyTime.split(' ')[1],
-      availableDays: doctor.availableDays
-    });
-  } catch (err) {
-    console.error('Availability check failed:', err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-});
 
 
 // GET all doctors
@@ -116,6 +114,5 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 module.exports = router;

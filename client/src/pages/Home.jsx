@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import bg from "../assets/bg-hospital.jpeg"
+import logo from "../assets/logo.jpeg"; 
 export default function Home() {
     return (
         <div
@@ -17,7 +18,7 @@ export default function Home() {
                 {/* Logo */}
                 <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
                     <img
-                        src="/logo192.png"
+                        src={logo}
                         alt="Hospital Appointo Logo"
                         className="w-24 h-24 rounded-full shadow-lg border-4 border-white bg-white object-contain"
                     />
@@ -38,15 +39,22 @@ export default function Home() {
                         to="/login"
                         className="bg-gradient-to-r from-cyan-600 to-teal-500 text-white px-8 py-2 rounded shadow hover:from-cyan-700 hover:to-teal-600 transition font-semibold"
                     >
-                        Login
+                        Patient Login
                     </Link>
                     <Link
-                        to="/signup"
-                        className="border-2 border-cyan-600 text-cyan-700 px-8 py-2 rounded shadow hover:bg-cyan-600 hover:text-white transition font-semibold"
+                        to="/doctor/login"
+                        className="border-2 border-purple-600 text-purple-700 px-8 py-2 rounded shadow hover:bg-purple-600 hover:text-white transition font-semibold"
                     >
-                        Sign Up
+                        Doctor Login
+                    </Link>
+                    <Link
+                        to="/admin/login"
+                        className="border-2 border-red-600 text-red-700 px-8 py-2 rounded shadow hover:bg-red-600 hover:text-white transition font-semibold"
+                    >
+                        Admin Login
                     </Link>
                 </div>
+
             </div>
         </div>
     );

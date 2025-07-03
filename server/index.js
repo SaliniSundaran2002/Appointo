@@ -3,6 +3,19 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const session = require('express-session');
+const passport = require('passport');
+require('./passport'); // import passport config
+
+app.use(session({
+  secret: 'appointo_secret',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
